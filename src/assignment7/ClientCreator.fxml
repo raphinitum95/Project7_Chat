@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="assignment7.Controller">
+   <children>
+      <Button layoutX="508.0" layoutY="343.0" mnemonicParsing="false" onAction="#quitChat" text="Quit" />
+      <Label layoutX="33.0" layoutY="49.0" text="IP Address: (localhost by default)" />
+      <Label layoutX="33.0" layoutY="192.0" text="Client Name:" />
+      <TextField fx:id="IPAddress" layoutX="300.0" layoutY="44.0" />
+      <TextField fx:id="Name" layoutX="300.0" layoutY="187.0" />
+      <Button layoutX="72.0" layoutY="343.0" mnemonicParsing="false" onAction="#createClient" text="Create" />
+      <Label fx:id="IPLabel" alignment="TOP_LEFT" layoutX="300.0" layoutY="81.0" prefHeight="45.0" prefWidth="167.0" text="Label" textFill="#ee0707" wrapText="true" />
+      <Label fx:id="NameLabel" alignment="TOP_LEFT" layoutX="300.0" layoutY="225.0" prefHeight="45.0" prefWidth="167.0" text="Label" textFill="#ff0505" wrapText="true" />
+   </children>
+</Pane>
