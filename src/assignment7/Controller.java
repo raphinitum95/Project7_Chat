@@ -8,9 +8,7 @@ import javafx.scene.layout.Pane;
 import java.util.ArrayList;
 
 public class Controller{
-    private static ArrayList<String> names = new ArrayList<>();
-    private static ArrayList<Integer> ports = new ArrayList<>();
-    private static int port = 1999;
+    public static ArrayList<String> names = new ArrayList<>();
     @FXML
     private Pane pane;
     @FXML
@@ -23,10 +21,7 @@ public class Controller{
     private Label NameLabel;
 
     public void initialize(){
-        IPLabel.setVisible(false);
-        IPLabel.setManaged(false);
-        NameLabel.setVisible(false);
-        NameLabel.setManaged(false);
+
     }
 
     @FXML
@@ -35,8 +30,7 @@ public class Controller{
     }
     @FXML
     private void createClient(){
-        port++;
-        String IP = IPAddress.getText();
+        String IP = "localhost";
         if(Name.getText().isEmpty()){
             NameLabel.setText("Please Enter a Name");
             NameLabel.setVisible(true);
@@ -49,18 +43,17 @@ public class Controller{
             NameLabel.setManaged(true);
             return;
         }
-        if(IPAddress.getText().isEmpty()) IP = "localhost";
-        else IP = IPAddress.getText();
+        //if(IPAddress.getText().isEmpty()) IP = "localhost";
+        //else IP = IPAddress.getText();
 
 
-        names.add(Name.getText());
+        /*names.add(Name.getText());
         IPLabel.setVisible(false);
         IPLabel.setManaged(false);
         NameLabel.setVisible(false);
-        NameLabel.setManaged(false);
+        NameLabel.setManaged(false);*/
         try {
-            new ClientMain().setUpNetworking(IP, port, Name.getText());
-            IPAddress.clear();
+            new ClientMain().setUpNetworking(IP, Name.getText());
             Name.clear();
         } catch (Exception e) {
             e.printStackTrace();

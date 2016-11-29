@@ -77,13 +77,13 @@ public class ServerMain extends Observable {
                             current.addObserver(client_w.get(str));
                         }
                         current.changed();
-                        current.notifyObservers(mes[size + 2]);
+                        current.notifyObservers(mes[1] + ":" + mes[size + 2]);
 
                     }
                     else if(mes[0].equals("2")){
                         Chat current = chats.get(mes[1]);
                         current.changed();
-                        current.notifyObservers(mes[2]);
+                        current.notifyObservers(mes[1] + ":" + mes[2]);
                     }
                 }
             } catch (IOException e) {
