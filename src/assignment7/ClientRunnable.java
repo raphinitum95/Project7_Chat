@@ -108,6 +108,8 @@ public class ClientRunnable implements Runnable{
     public void run() {
         while(true){
             if(temp_message != null) {
+                writer.println(temp_message);
+                writer.flush();
                 if (group) {
                     synchronized (clients) {
                         temp_message = temp_message + "\n";
