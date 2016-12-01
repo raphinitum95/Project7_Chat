@@ -7,13 +7,14 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+    public static Stage personalChat;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("ClientCreator.fxml"));
-        primaryStage.setTitle("Client Creator");
+        Parent root = FXMLLoader.load(getClass().getResource("LogIn.fxml"));
         primaryStage.setScene(new Scene(root, 600, 450));
         primaryStage.show();
+        personalChat = primaryStage;
 
 
     }

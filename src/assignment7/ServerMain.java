@@ -11,11 +11,10 @@ import java.util.HashMap;
 import java.util.Observable;
 
 public class ServerMain extends Observable {
-    private HashMap<String, ClientObserver> client_w = new HashMap<>();
-    private HashMap<String, PrintWriter> printClient = new HashMap<>();
-    private HashMap<String, Chat> chats = new HashMap<>();
-    private ArrayList<String> usernameList = new ArrayList<>();
-    private String Username;
+    private static HashMap<String, ClientObserver> client_w = new HashMap<>();
+    private static HashMap<String, PrintWriter> printClient = new HashMap<>();
+    private static HashMap<String, Chat> chats = new HashMap<>();
+    private static ArrayList<String> usernameList = new ArrayList<>();
     public static void main(String[] args) {
         try {
             new ServerMain().setUpNetworking();
@@ -30,26 +29,23 @@ public class ServerMain extends Observable {
         while (true) {
             Socket clientSocket = serverSock.accept();
             ClientObserver writer = new ClientObserver(clientSocket.getOutputStream());
-            PrintWriter print = new PrintWriter(clientSocket.getOutputStream());
             Thread t = new Thread(new ClientHandler(clientSocket));
             t.start();
-            BufferedReader UsernameReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            while((Username = UsernameReader.readLine())!= null) {
-                printClient.put(Username, print);
-                client_w.put(Username, writer);
-                System.out.println(Username);
-            }
             this.addObserver(writer);
-            usernameList.add(Username);
             System.out.println("got a connection");
         }
     }
     class ClientHandler implements Runnable {
         private BufferedReader reader;
+        private ClientObserver writer;
+        private PrintWriter print;
 
         public ClientHandler(Socket clientSocket) {
             Socket sock = clientSocket;
+
             try {
+                writer = new ClientObserver(clientSocket.getOutputStream());
+                print = new PrintWriter(clientSocket.getOutputStream());
                 reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -59,31 +55,48 @@ public class ServerMain extends Observable {
         public void run() {
             String message;
             String[] mes;
+            String temp_name;
+            boolean flag;
             try {
                 while ((message = reader.readLine()) != null) {
-                    System.out.println("Server read: " + message);
-                    mes = message.split(";");
-
-                    if(mes[0].equals("1")){
-                        int size = Integer.parseInt(mes[1]);
-                        String[] temp = new String[size];
-                        for(int i = 0; i < size; i++){
-                            temp[i] = mes[i+2];
+                    flag = true;
+                    mes = message.split(":", 4);
+                    if(mes[0].charAt(0) == '@') {
+                        try{
+                            Integer.parseInt(mes[0].substring(1));
+                        }catch(Exception e){
+                            if (printClient.get(mes[0]) == null) {
+                                printClient.put(mes[0], print);
+                                client_w.put(mes[0], writer);
+                                System.out.println(mes[0]);
+                                usernameList.add(mes[0]);
+                            }
+                            flag = false;
                         }
-                        Chat current = new Chat(temp);
-                        chats.put(mes[1], current);
+                        if(flag) {
+                            System.out.println("Server read: " + message);
 
-                        for(String str: temp){
-                            current.addObserver(client_w.get(str));
+
+                            if (!chats.containsKey(mes[0])) {
+                                String[] temp = mes[2].split(";");
+                                temp_name = mes[1];
+
+                                Chat current = new Chat(temp);
+                                chats.put(mes[0], current);
+
+                                for (String str : temp) {
+                                    current.addObserver(client_w.get("@" + str));
+                                }
+                                current.changed();
+                                current.notifyObservers(mes[0] + ":" + temp_name + ":" + mes[2] + ":" + mes[3]);
+
+                            } else {
+                                Chat current = chats.get(mes[0]);
+                                current.changed();
+                                current.notifyObservers(mes[0] + ":" + mes[1] + ":" + mes[2] + ":" + mes[3]);
+                                current.unChanged();
+                            }
                         }
-                        current.changed();
-                        current.notifyObservers(mes[1] + ":" + mes[size + 2]);
-
-                    }
-                    else if(mes[0].equals("2")){
-                        Chat current = chats.get(mes[1]);
-                        current.changed();
-                        current.notifyObservers(mes[1] + ":" + mes[2]);
                     }
                 }
             } catch (IOException e) {
