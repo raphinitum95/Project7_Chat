@@ -1,5 +1,6 @@
 package assignment7;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -16,12 +17,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.management.PlatformLoggingMXBean;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Controller{
+    private static ArrayList<String> names = new ArrayList<>();
+    public static HashMap<String, ClientRunnable> runable = new HashMap<>();
     public static ArrayList<ClientRunnable> clients = new ArrayList<>();
+    public static HashMap<String, Controller> log = new HashMap<>();
     public static HashMap<String, ArrayList<String>> friend_list = new HashMap<>();
     public static HashMap<String, ArrayList<String>> friend_requests = new HashMap<>();
     public static HashMap<String, Integer> active_chat = new HashMap<>();
@@ -71,6 +76,8 @@ public class Controller{
         noFriend.setManaged(false);
         noFriend.setVisible(false);
         chatView.setDividerPositions(0);
+
+        log.put(names.get(indx), this);
 
         text = outgoing;
         board = incoming;
@@ -144,8 +151,8 @@ public class Controller{
                     }
                 });
 
-                    friendRequest.setScene(new Scene(pane, 500, 250));
-                    friendRequest.showAndWait();
+                friendRequest.setScene(new Scene(pane, 500, 250));
+                friendRequest.showAndWait();
             }
         });
     }
@@ -371,9 +378,7 @@ public class Controller{
     }
 
     public class ClientRunnable implements Runnable{
-        private HashMap<String, ArrayList<ClientRunnable>> chats = new HashMap<>();
         private ArrayList<String> chatnames;
-        private ArrayList<String> names;
         private Socket sock;
         private TextField input;
         private TextArea message;
@@ -381,11 +386,12 @@ public class Controller{
         public String name;
         private BufferedReader reader;
         private PrintWriter writer;
-        private Stage client;
         private Label particip;
+        private Stage client;
         ClientRunnable(String name, Socket sock){
-            client = new Stage();
             this.name = name;
+            client = new Stage();
+            names.add(this.name);
             try {
                 InputStreamReader streamReader = new InputStreamReader(sock.getInputStream());
                 reader = new BufferedReader(streamReader);
@@ -406,6 +412,7 @@ public class Controller{
             this.message = board;
             this.input = text;
             this.btn = sender;
+            runable.put(name, this);
             this.particip = part;
             friend_list.put(name, new ArrayList<>());
             friend_requests.put(name, new ArrayList<>());
@@ -476,18 +483,28 @@ public class Controller{
             String[] m;
             try {
                 while ((message = reader.readLine()) != null) {
-                    Thread.sleep(0);
-                    synchronized (sender) {
-                        m = message.split(":", 4);
-                        String chat_name = m[0].substring(1);
-                        if (m[1].equals(name)) {
-                            this.message.setText(chat_history.get(Integer.parseInt(chat_name)));
-                            this.message.appendText("<" + m[1] + "> " + m[3] + "\n");
-                            chat_history.put(Integer.parseInt(chat_name), this.message.getText());
+                    if (message.charAt(0) == '&') {
+                        String[] temp = message.split(";");
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                log.get(temp[0].substring(1)).runable.get(temp[0].substring(1)).client.show();
+                            }
+                        });
+                    } else {
+                        Thread.sleep(0);
+                        synchronized (sender) {
+                            m = message.split(":", 4);
+                            String chat_name = m[0].substring(1);
+                            if (m[1].equals(name)) {
+                                this.message.setText(chat_history.get(Integer.parseInt(chat_name)));
+                                this.message.appendText("<" + m[1] + "> " + m[3] + "\n");
+                                chat_history.put(Integer.parseInt(chat_name), this.message.getText());
+                            }
+                            updateMessage(m[2].split(";"));
                         }
-                        updateMessage(m[2].split(";"));
+                        System.out.print("");
                     }
-                    System.out.print("");
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();

@@ -44,7 +44,7 @@ public class LogInController {
                 if(IP.getText().isEmpty()) address = "localhost";
                 else address = IP.getText();
                 try {
-                    new ClientMain().setUpNetworking(address, username.getText());
+                    ServerMain.setNetworking(address, username.getText());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -74,6 +74,11 @@ public class LogInController {
         } else if(username.getText().contains(" ")){
             error.setStyle("-fx-text-fill: red;");
             error.setText("Username cannot contain spaces");
+            error.setVisible(true);
+            error.setManaged(true);
+        } else if(userLog.containsKey(username.getText())){
+            error.setStyle("-fx-text-fill: red;");
+            error.setText("Account already exists");
             error.setVisible(true);
             error.setManaged(true);
         } else{
